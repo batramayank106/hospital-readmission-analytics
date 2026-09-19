@@ -1,0 +1,26 @@
+# Virtual environment (recreate with: python -m venv venv)
+venv/
+
+# Secrets / local config
+.env
+*.pem
+config.ini
+
+# Python caches and build artefacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Jupyter checkpoints (notebooks themselves are committed WITH outputs)
+.ipynb_checkpoints/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Docker volumes / local database dumps
+*.sql.gz
+*.dump
