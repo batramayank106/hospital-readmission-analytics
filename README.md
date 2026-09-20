@@ -71,7 +71,7 @@ precision, recall, F1, and ROC-AUC alongside accuracy.
 | Highest-risk simple rule (2+ prior inpatient stays) | **21.40%** |
 | High-utilization cohort (15.7% of encounters) | **18.93%** |
 | Share of all readmissions from ages 60–90 | **~67%** |
-| Best model (XGBoost, test set) | Recall **0.59**, ROC-AUC **0.68** |
+| Best model (tuned XGBoost, test set) | Recall **0.61**, F1 **0.28**, ROC-AUC **0.68** |
 | SQL business questions answered | **25** |
 
 ## Key findings (with charts)
@@ -188,12 +188,16 @@ from modeling (700+ raw codes need dedicated grouping — stated openly).
 
 | Model | Accuracy | Precision | Recall | F1 | ROC-AUC |
 |---|---|---|---|---|---|
-| Logistic Regression (baseline) | 0.659 | 0.171 | 0.535 | 0.259 | 0.645 |
-| **XGBoost** | **0.664** | **0.185** | **0.589** | **0.281** | **0.678** |
+| Logistic Regression (baseline) | 0.656 | 0.169 | 0.533 | 0.257 | 0.642 |
+| Logistic Regression (tuned C) | 0.660 | 0.171 | 0.530 | 0.258 | 0.644 |
+| XGBoost (baseline) | 0.671 | 0.183 | 0.564 | 0.277 | 0.672 |
+| XGBoost (tuned, thr 0.5) | 0.648 | 0.181 | 0.611 | 0.279 | 0.679 |
+| **XGBoost (tuned, thr 0.55)** | **0.744** | **0.206** | **0.455** | **0.284** | **0.679** |
 
-XGBoost finds more true readmissions on every metric that matters here. Absolute
-performance is modest — admin data alone cannot fully predict readmission, and
-that honest result is stated in the notebook.
+Tuning (`min_frequency=20` encoding, GridSearchCV, threshold 0.55) lifts recall
+~8% over baseline at the default cutoff and gives the best F1. Absolute
+performance stays modest — admin data alone cannot fully predict readmission,
+and that honest result is stated in the notebook.
 
 ![Confusion matrices](images/confusion_matrices.png)
 ![ROC curves](images/roc_curves.png)

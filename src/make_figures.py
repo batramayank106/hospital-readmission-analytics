@@ -25,33 +25,33 @@ NOTEBOOK_DIR = PROJECT_ROOT / "notebooks"
 IMAGE_DIR = PROJECT_ROOT / "images"
 DATA_PATH = PROJECT_ROOT / "data" / "processed" / "diabetes_clean.csv"
 
-# (notebook, code-cell index among code cells, 1-based, filename)
-# Cell numbers were mapped from the executed notebooks; each listed cell
-# produces exactly the figure saved under the given name.
+# (notebook, code-cell index among code cells, 1-based, output index, filename)
+# Cell numbers were mapped from the executed notebooks. When a cell produces
+# several PNGs, output index picks which one (0 = first).
 EXTRACT = [
-    ("01_eda", 4, "target_distribution.png"),
-    ("01_eda", 5, "age_distribution.png"),
-    ("01_eda", 7, "prior_utilization.png"),
-    ("01_eda", 12, "prior_use_rates.png"),
-    ("01_eda", 13, "correlation_heatmap.png"),
-    ("02_statistics", 3, "discharge_rates.png"),
-    ("03_modeling", 6, "confusion_matrices.png"),
-    ("03_modeling", 7, "roc_curves.png"),
+    ("01_eda", 4, 0, "target_distribution.png"),
+    ("01_eda", 5, 0, "age_distribution.png"),
+    ("01_eda", 7, 0, "prior_utilization.png"),
+    ("01_eda", 12, 0, "prior_use_rates.png"),
+    ("01_eda", 13, 0, "correlation_heatmap.png"),
+    ("02_statistics", 3, 0, "discharge_rates.png"),
+    ("03_modeling", 6, 0, "confusion_matrices.png"),
+    ("03_modeling", 6, 1, "roc_curves.png"),
 ]
 
 
 def extract_notebook_figures() -> None:
     IMAGE_DIR.mkdir(parents=True, exist_ok=True)
-    for nb_name, cell_no, filename in EXTRACT:
+    for nb_name, cell_no, out_idx, filename in EXTRACT:
         nb = json.loads((NOTEBOOK_DIR / f"{nb_name}.ipynb").read_text())
         code_cells = [c for c in nb["cells"] if c["cell_type"] == "code"]
         cell = code_cells[cell_no - 1]
-        for output in cell.get("outputs", []):
-            png_b64 = (output.get("data") or {}).get("image/png")
-            if png_b64:
-                (IMAGE_DIR / filename).write_bytes(base64.b64decode(png_b64))
-                print(f"extracted {nb_name} cell{cell_no} -> images/{filename}")
-                break
+        pngs = [(output.get("data") or {}).get("image/png")
+                for output in cell.get("outputs", [])]
+        pngs = [p for p in pngs if p]
+        png_b64 = pngs[out_idx]
+        (IMAGE_DIR / filename).write_bytes(base64.b64decode(png_b64))
+        print(f"extracted {nb_name} cell{cell_no}[{out_idx}] -> images/{filename}")
 
 
 def readmission_by_age() -> None:
